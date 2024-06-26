@@ -1,11 +1,26 @@
-# RISC Zero Rust Starter Template
+# Cairo with RISC Zero
 
-Welcome to the RISC Zero Rust Starter Template! This template is intended to
-give you a starting point for building a project using the RISC Zero zkVM.
-Throughout the template (including in this README), you'll find comments
-labelled `TODO` in places where you'll need to make changes. To better
-understand the concepts behind this template, check out the [zkVM
-Overview][zkvm-overview].
+Custom script to compile Cairo file to RISC-V ELF to be ran in RISC Zero.
+
+```sh
+./compile-example.sh
+```
+
+Note: currently, `riscv32-unknown-elf-as example.s -o example.o` will not work without specifying explicity the `_start` as the entry point in `example.s`. We can specify some dummy instruction to make it work first.
+
+```
+    # Define the _start symbol as the entry point
+    .globl _start
+    .type _start, @function
+_start:
+    addi    sp, sp, -16                                     # Adjust stack pointer
+    sw  ra, 8(sp)                                           # Save return address
+    call    "example::example::main(f15270207278767002344)" # <- this was the generated main function, modify as necessary
+    lw  ra, 8(sp)                                           # Restore return address
+    addi    sp, sp, 16                                      # Restore stack pointer
+    li  a7, 93                                              # Syscall for exit (93 is the syscall number for exit in Linux)
+    ecall                                                   # Make the syscall
+```
 
 ## Quick Start
 
